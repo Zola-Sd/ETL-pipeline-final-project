@@ -1,11 +1,5 @@
-import csv
+import pandas as pd
 
-def extract_data():
-    with open('test.csv', 'r') as f:
-        contents = csv.DictReader(f)
+df = pd.read_csv('test.csv')
 
-        sales_data = [row for row in contents]
-    
-    return sales_data
-
-sales_data = extract_data()
+print(df)
