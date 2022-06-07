@@ -49,7 +49,18 @@ def create_items_table():
     cursor.execute(sql)
     connection.commit()
 
-
+def customer_table():
+    sql = \
+        ''' 
+        CREATE TABLE IF NOT EXISTS cust_table(
+            cust_id int, 
+            cust_name VARCHAR,
+            cust_card int
+            
+            );'''
+            
+    cursor.execute(sql)
+    connection.commit()
 
 
 
@@ -70,4 +81,5 @@ def create_items_table():
 create_store_table()
 create_transaction_table()
 create_items_table()
+customer_table()
 connection.close()
