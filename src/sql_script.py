@@ -1,14 +1,16 @@
 import psycopg2 as db_connect
-host_name="localhost"
-db_user="root"
-db_password="password"
-db_name="postgres"
+host_name = "localhost"
+db_user = "root"
+db_password = "password"
+db_name = "postgres"
 
-connection = db_connect.connect(host=host_name,user=db_user,password=db_password,database=db_name)
+connection = db_connect.connect(
+    host=host_name, user=db_user, password=db_password, database=db_name)
 cursor = connection.cursor()
 
+
 def create_store_table():
-    sql= \
+    sql = \
         """ 
         CREATE TABLE IF NOT EXISTS store_table( 
         branch_code varchar, 
@@ -18,6 +20,7 @@ def create_store_table():
 
     cursor.execute(sql)
     connection.commit()
+
 
 def create_transaction_table():
     sql = \
@@ -49,37 +52,40 @@ def create_items_table():
     cursor.execute(sql)
     connection.commit()
 
+
 def customer_table():
     sql = \
         ''' 
         CREATE TABLE IF NOT EXISTS cust_table(
-            cust_id int, 
+            cust_id int PRIMARY KEY, 
             cust_name VARCHAR,
             cust_card int
             
             );'''
-            
+
     cursor.execute(sql)
     connection.commit()
 
 
+def create_basket_table():
+    sql = \
+        """
+        CREATE TABLE IF NOT EXISTS basket_table(
+            order_id int PRIMARY KEY,
+            cust_id int,
+            item_id int,
+            total_price float
+            );
+    """
+    cursor.execute(sql)
+    connection.commit()
 
 
-
-
-
-
-
-
-
-
-
-
-
-#func_1()
-#func_2()
+# func_1()
+# func_2()
 create_store_table()
 create_transaction_table()
 create_items_table()
+create_basket_table()
 customer_table()
 connection.close()
