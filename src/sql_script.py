@@ -36,6 +36,20 @@ def create_transaction_table():
     connection.commit()
 
 
+def create_items_table():
+    sql = \
+        """
+        CREATE TABLE IF NOT EXISTS items_table(
+        item_id INT PRIMARY KEY,
+        item_name varchar, 
+        item_price float
+        );
+    """
+
+    cursor.execute(sql)
+    connection.commit()
+
+
 
 
 
@@ -55,4 +69,5 @@ def create_transaction_table():
 #func_2()
 create_store_table()
 create_transaction_table()
+create_items_table()
 connection.close()
