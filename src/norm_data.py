@@ -24,7 +24,7 @@ def store_table():
     print(df_table)
 
 
-store_table()
+# store_table()
 
 
 def items_table():
@@ -41,106 +41,62 @@ def items_table():
         prices1 = []
         for val in prices:
             prices1.append(val.split("-")[-1])
-        print(prices1[0])
+        # print(prices1[0])
+        flav1 = []
+        for val in prices:
+            if 'Flavoured' in val:
+                flav1.append(val.split("-")[1])
+            else:
+                flav1.append("No Flav")
 
-    print(item_names[0])
-    print(prices)
+    # print(item_names[0])
+    # print(prices)
     items_dict = {
         'item_names': item_names,
-        'prices': prices1
+        'prices': prices1,
+        'flavour': flav1,
     }
 
-    print(item_names[0])
-    print(prices[0])
-    print(item_names)
+    # print(item_names[0])
+    # print(prices[0])
+    # print(item_names)
     df_itemd = pd.DataFrame(items_dict, columns=[
-                            'item_names', 'prices'])
+                            'item_names', 'prices', 'flavour'])
 
-    print(df_itemd)
+    # print(df_itemd)
 
     uni_time = df_itemd['item_names'].unique()
     uni_price = df_itemd['prices'].unique()
-
+    uni_flav = df_itemd['flavour'].unique()
     print(uni_time)
     print(uni_price)
+    print(uni_flav)
 
     df_product_name = pd.DataFrame(uni_time, columns=['Item_names'])
-    df_product_name = pd  .DataFrame(uni_price, columns=['price'])
+    df_product_price = pd.DataFrame(uni_price, columns=['price'])
+    df_product_flav = pd.DataFrame(uni_flav, columns=['flavour'])
 
     print(df_product_name)
+    print(df_product_price)
+    print(df_product_flav)
+    print(df_itemd)
 
-    # ,'flavour', 'item_name...)
-    # df_items = pd.DataFrame(item_names, columns=['item_names'])
-    # print(df_items)
+    df_itemd = pd.DataFrame(items_dict)
 
-    # for item in orders[0]:
-    #     print(item.split(" "))
+    df_itemd.drop_duplicates()
 
+    df_dups_removed = df_itemd.drop_duplicates(
+        subset=['item_names', 'flavour'])
+    df_dups_removed.sort_values(by=['item_names'])
+    print(df_dups_removed)
 
-# items_table()
-# def format_timestamp():
-#     df['timestamp'] = pd.Timestamp('timestamp', format='%d/%m/%Y %H:%M')
+    df_index = df_dups_removed.reset_index(drop=True)
+    df_index['item_id'] = df_index.index
 
-#     print(df)
-
-
-# format_timestamp()
-
-
-# df['timestamp'] = pd.Timestamp(df['timestamp'])
-
-# print(df.to_string())
-
-
-def Items_table_test():
-    # df_items: item_names, flavour, item_name, combined_id, price
-    orders = [order.split(" , ") for order in df['basket_items']]
-    # print(orders)
-    item_names = []
-    prices = []
-    # print(orders[0])
-    for item in orders:
-        for value in item:
-            item_names.append(value.split("-")[0])
-            prices.append(value.split(",")[0])
-            prices1 = []
-        for val in prices:
-            prices1.append(val.split("-")[-1])
-        # print(prices1[0])
-    # print(item_names[0])
-
-    # print(item_names)
-    # print(prices1)
-    #uni_time = list(set(item_names))
-    # print(uni_time)
-    dict = {"Item_name": item_names,
-            "price": prices1, }
-    # "index": len(uni_time)}
-    df_itemd = pd.DataFrame(dict)
-    # trying to add auto incremet id
-    #df_itemd.insert(0, 'Item_id', range(0, 0 + len(df_itemd)))
-    # print(df_itemd)
-
-    df_dupsremoved = df_itemd.drop_duplicates()
-
-    # print(df_dupsremoved)
-    # removes duplicates
-    df_dupsremoved_only_name = df_itemd.drop_duplicates(subset=['Item_name'])
-    # print(df_dupsremoved_only_name)
-    # removes random index
-    df_index = df_dupsremoved_only_name.reset_index(drop=True)
     print(df_index)
 
-    # uni_time = df_itemd['Item_name'].unique()
 
-    # # print(uni_time)
-
-    # df_product_name = pd.DataFrame(uni_time, columns=['Item_names'])
-
-    # print(df_product_name)
-
-
-Items_table_test()
+items_table()
 
 
 def Trans_table():
@@ -171,46 +127,43 @@ def Trans_table():
     print(df_transtable_no_dups)
 
 
-Trans_table()
+# Trans_table()
 
 
 def customer_table():
-    
-# Convert column to string
+
+    # Convert column to string
     df['customer_name'] = df['customer_name'].astype(str)
 # Apply hashing function to the column
     df['customer_name'] = df['customer_name'].apply(
-        lambda x: 
+        lambda x:
             hashlib.sha256(x.encode()).hexdigest()
-)
-    df_customer_name_hash=df['customer_name']
-    
-    df['card_number']=df['card_number'].astype('string')
-    df['card_number']=df['card_number'].fillna('CASH')
+    )
+    df_customer_name_hash = df['customer_name']
 
-    df.loc[df['card_number'] =='CASH', 'card_number'] = 'CASH' 
-    df.loc[df['card_number'] !='CASH', 'card_number'] = df['card_number'].apply(
-        lambda x: 
+    df['card_number'] = df['card_number'].astype('string')
+    df['card_number'] = df['card_number'].fillna('CASH')
+
+    df.loc[df['card_number'] == 'CASH', 'card_number'] = 'CASH'
+    df.loc[df['card_number'] != 'CASH', 'card_number'] = df['card_number'].apply(
+        lambda x:
             hashlib.sha256(x.encode()).hexdigest()
-)   
+    )
 
-
-
- 
-    df_card_number_hash=df['card_number']
+    df_card_number_hash = df['card_number']
     # print(df)
 
     dict_ayub = {"customer_name_hash": df_customer_name_hash,
-             "card_number_hash": df_card_number_hash,
-             }
-    
+                 "card_number_hash": df_card_number_hash,
+                 }
+
     df_customer = pd.DataFrame(dict_ayub)
     # checking for duplicates
-    df_cust_transformed = df_customer.drop_duplicates(subset=['customer_name_hash','card_number_hash'],keep='first')
+    df_cust_transformed = df_customer.drop_duplicates(
+        subset=['customer_name_hash', 'card_number_hash'], keep='first')
 
     print(df_customer)
     print(df_cust_transformed)
 
-   
 
-customer_table()
+# customer_table()
