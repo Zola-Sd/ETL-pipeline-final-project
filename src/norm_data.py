@@ -1,5 +1,6 @@
 import pandas as pd
 from pathlib import Path
+import hashlib
 
 
 def fetch_filepath(filename):
@@ -171,3 +172,45 @@ def Trans_table():
 
 
 Trans_table()
+
+
+def customer_table():
+    
+# Convert column to string
+    df['customer_name'] = df['customer_name'].astype(str)
+# Apply hashing function to the column
+    df['customer_name'] = df['customer_name'].apply(
+        lambda x: 
+            hashlib.sha256(x.encode()).hexdigest()
+)
+    df_customer_name_hash=df['customer_name']
+    
+    df['card_number']=df['card_number'].astype('string')
+    df['card_number']=df['card_number'].fillna('CASH')
+
+    df.loc[df['card_number'] =='CASH', 'card_number'] = 'CASH' 
+    df.loc[df['card_number'] !='CASH', 'card_number'] = df['card_number'].apply(
+        lambda x: 
+            hashlib.sha256(x.encode()).hexdigest()
+)   
+
+
+
+ 
+    df_card_number_hash=df['card_number']
+    # print(df)
+
+    dict_ayub = {"customer_name_hash": df_customer_name_hash,
+             "card_number_hash": df_card_number_hash,
+             }
+    
+    df_customer = pd.DataFrame(dict_ayub)
+    # checking for duplicates
+    df_cust_transformed = df_customer.drop_duplicates(subset=['customer_name_hash','card_number_hash'],keep='first')
+
+    print(df_customer)
+    print(df_cust_transformed)
+
+   
+
+customer_table()
