@@ -136,7 +136,7 @@ def customer_table():
 # customer_table()
 
 
-def Trans_table():
+def trans_table():
     df_trans_time = df['timestamp']
     df_trans_bcode = df['store']
     df_trans_payment = df['cash_or_card']
@@ -144,13 +144,13 @@ def Trans_table():
     df_trans_tt = df['total_price']
 
     # print(df_trans_time)
-    DictT = {"time_stamp": df_trans_time,
+    dict_t = {"time_stamp": df_trans_time,
              "store": df_trans_bcode,
              "payment_type": df_trans_payment,
              "Cust_name": df_trans_cust,
              "Total_price": df_trans_tt}
 
-    df_transtable = pd.DataFrame(DictT)
+    df_transtable = pd.DataFrame(dict_t)
     # checking for duplicates
     df_transtable_no_dups = df_transtable.drop_duplicates(
         subset=['Cust_name'])
