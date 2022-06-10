@@ -14,11 +14,14 @@ def fetch_connection():
 connection = fetch_connection()
 cursor = connection.cursor()
 
+# Creating store table
+
 
 def create_store_table():
     sql = \
         """ 
         CREATE TABLE IF NOT EXISTS store_table( 
+        branch_id SERIAL PRIMARY KEY,
         branch_code varchar, 
         branch_name varchar
         );
@@ -27,14 +30,17 @@ def create_store_table():
     cursor.execute(sql)
     connection.commit()
 
+# Creating transaction table
+
 
 def create_transaction_table():
     sql = \
         """
         CREATE TABLE IF NOT EXISTS transactions_table(
-        tran_id INT PRIMARY KEY,
+        trans_id SERIAL PRIMARY KEY,
+        order_id int,
         time varchar, 
-        branch_code varchar,
+        branch_id int,
         cust_id int, 
         payment_method varchar,
         total_price float
@@ -44,12 +50,14 @@ def create_transaction_table():
     cursor.execute(sql)
     connection.commit()
 
+# Creating items table
+
 
 def create_items_table():
     sql = \
         """
         CREATE TABLE IF NOT EXISTS items_table(
-        item_id INT PRIMARY KEY,
+        item_id SERIAL PRIMARY KEY,
         item_name varchar, 
         item_price float
         );
@@ -59,11 +67,12 @@ def create_items_table():
     connection.commit()
 
 
+# Creating customer table
 def customer_table():
     sql = \
         ''' 
         CREATE TABLE IF NOT EXISTS cust_table(
-            cust_id int PRIMARY KEY, 
+            cust_id SERIAL PRIMARY KEY, 
             cust_name VARCHAR,
             cust_card int
             
@@ -72,12 +81,14 @@ def customer_table():
     cursor.execute(sql)
     connection.commit()
 
+# Creating basket table
+
 
 def create_basket_table():
     sql = \
         """
         CREATE TABLE IF NOT EXISTS basket_table(
-            order_id int PRIMARY KEY,
+            order_id SERIAL PRIMARY KEY,
             cust_id int,
             item_id int,
             total_price float
@@ -87,11 +98,11 @@ def create_basket_table():
     connection.commit()
 
 
-# func_1()
-# func_2()
+# Running functions
 create_store_table()
 create_transaction_table()
 create_items_table()
 create_basket_table()
 customer_table()
+# Closing DB connection
 connection.close()
