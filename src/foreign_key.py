@@ -9,18 +9,17 @@ connection = db_connect.connect(
 cursor = connection.cursor()
 
 
-
-
-
 def alter_tran_table():
     sql = \
         '''
         ALTER TABLE transactions_table
-        ADD FOREIGN KEY (cust_id) REFERENCES transactions_table(tran_id)
+        ADD FOREIGN KEY (cust_id) REFERENCES transactions_table(trans_id),
+        ADD FOREIGN KEY (branch_id) REFERENCES transactions_table(trans_id);
         '''
 
     cursor.execute(sql)
     connection.commit()
+
 
 def alter_basket_table():
     sql = \
@@ -33,8 +32,6 @@ def alter_basket_table():
 
     cursor.execute(sql)
     connection.commit()
-
-
 
 
 alter_tran_table()

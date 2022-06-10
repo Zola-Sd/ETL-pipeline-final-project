@@ -13,6 +13,7 @@ def create_store_table():
     sql = \
         """ 
         CREATE TABLE IF NOT EXISTS store_table( 
+        branch_id SERIAL PRIMARY KEY,
         branch_code varchar, 
         branch_name varchar
         );
@@ -26,9 +27,9 @@ def create_transaction_table():
     sql = \
         """
         CREATE TABLE IF NOT EXISTS transactions_table(
-        tran_id INT PRIMARY KEY,
+        trans_id SERIAL PRIMARY KEY,
         time varchar, 
-        branch_code varchar,
+        branch_id int,
         cust_id int, 
         payment_method varchar,
         total_price float
@@ -57,7 +58,7 @@ def customer_table():
     sql = \
         ''' 
         CREATE TABLE IF NOT EXISTS cust_table(
-            cust_id int PRIMARY KEY, 
+            cust_id SERIAL PRIMARY KEY, 
             cust_name VARCHAR,
             cust_card int
             
@@ -71,7 +72,7 @@ def create_basket_table():
     sql = \
         """
         CREATE TABLE IF NOT EXISTS basket_table(
-            order_id int PRIMARY KEY,
+            order_id SERIAL PRIMARY KEY,
             cust_id int,
             item_id int,
             total_price float
