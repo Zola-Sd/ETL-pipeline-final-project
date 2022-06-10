@@ -28,6 +28,7 @@ def create_transaction_table():
         """
         CREATE TABLE IF NOT EXISTS transactions_table(
         trans_id SERIAL PRIMARY KEY,
+        order_id int,
         time varchar, 
         branch_id int,
         cust_id int, 

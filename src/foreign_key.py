@@ -14,7 +14,8 @@ def alter_tran_table():
         '''
         ALTER TABLE transactions_table
         ADD FOREIGN KEY (cust_id) REFERENCES transactions_table(trans_id),
-        ADD FOREIGN KEY (branch_id) REFERENCES transactions_table(trans_id);
+        ADD FOREIGN KEY (branch_id) REFERENCES transactions_table(trans_id),
+        ADD FOREIGN KEY (order_id) REFERENCES transactions_table(trans_id);
         '''
 
     cursor.execute(sql)
