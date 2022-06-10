@@ -43,7 +43,7 @@ def create_items_table():
     sql = \
         """
         CREATE TABLE IF NOT EXISTS items_table(
-        item_id INT PRIMARY KEY,
+        item_id SERIAL PRIMARY KEY,
         item_name varchar, 
         item_price float
         );
