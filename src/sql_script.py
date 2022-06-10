@@ -1,11 +1,17 @@
 import psycopg2 as db_connect
-host_name = "localhost"
-db_user = "root"
-db_password = "password"
-db_name = "postgres"
 
-connection = db_connect.connect(
-    host=host_name, user=db_user, password=db_password, database=db_name)
+def fetch_connection():
+    host_name = "localhost"
+    db_user = "root"
+    db_password = "password"
+    db_name = "postgres"
+
+    connection = db_connect.connect(
+        host=host_name, user=db_user, password=db_password, database=db_name)
+    
+    return connection
+    
+connection = fetch_connection()
 cursor = connection.cursor()
 
 

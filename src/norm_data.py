@@ -20,11 +20,8 @@ def store_table():
     df_table['Store code'] = [store_name[:3].upper()
                               for store_name in df_table['Store name']]
 
-    print(df_store_column)
-    print(df_table)
-
-
-# store_table()
+    # print(df_store_column)
+    return df_table
 
 
 def items_table():
@@ -93,10 +90,10 @@ def items_table():
     df_index = df_dups_removed.reset_index(drop=True)
     df_index['item_id'] = df_index.index
 
-    print(df_index)
+    return df_index
 
 
-items_table()
+# items_table()
 
 
 def customer_table():
@@ -133,10 +130,10 @@ def customer_table():
         subset=['customer_name_hash', 'card_number_hash'], keep='first')
 
     # print(df_customer)
-    print(df_cust_transformed)
+    return df_cust_transformed
 
 
-customer_table()
+# customer_table()
 
 
 def Trans_table():
@@ -164,7 +161,7 @@ def Trans_table():
     # df_transtable['Total_price'] = df_trans_tt
 
     # print(df_transtable)
-    print(df_transtable_no_dups)
+    return df_transtable_no_dups
 
 
-Trans_table()
+# Trans_table()
