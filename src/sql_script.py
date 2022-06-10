@@ -4,9 +4,13 @@ db_user = "root"
 db_password = "password"
 db_name = "postgres"
 
+# Establishing DB connection
+
 connection = db_connect.connect(
     host=host_name, user=db_user, password=db_password, database=db_name)
 cursor = connection.cursor()
+
+# Creating store table
 
 
 def create_store_table():
@@ -21,6 +25,8 @@ def create_store_table():
 
     cursor.execute(sql)
     connection.commit()
+
+# Creating transaction table
 
 
 def create_transaction_table():
@@ -40,6 +46,8 @@ def create_transaction_table():
     cursor.execute(sql)
     connection.commit()
 
+# Creating items table
+
 
 def create_items_table():
     sql = \
@@ -55,6 +63,7 @@ def create_items_table():
     connection.commit()
 
 
+# Creating customer table
 def customer_table():
     sql = \
         ''' 
@@ -67,6 +76,8 @@ def customer_table():
 
     cursor.execute(sql)
     connection.commit()
+
+# Creating basket table
 
 
 def create_basket_table():
@@ -83,11 +94,11 @@ def create_basket_table():
     connection.commit()
 
 
-# func_1()
-# func_2()
+# Running functions
 create_store_table()
 create_transaction_table()
 create_items_table()
 create_basket_table()
 customer_table()
+# Closing DB connection
 connection.close()
