@@ -39,7 +39,7 @@ def create_transaction_table():
         CREATE TABLE IF NOT EXISTS transactions_table(
         trans_id SERIAL PRIMARY KEY,
         order_id int,
-        time varchar, 
+        time_stamp varchar,
         branch_id int,
         cust_id int, 
         payment_method varchar,
@@ -59,7 +59,8 @@ def create_items_table():
         CREATE TABLE IF NOT EXISTS items_table(
         item_id SERIAL PRIMARY KEY,
         item_name varchar, 
-        item_price float
+        item_price float,
+        flavour varchar
         );
     """
 
@@ -72,10 +73,9 @@ def customer_table():
     sql = \
         ''' 
         CREATE TABLE IF NOT EXISTS cust_table(
-            cust_id SERIAL PRIMARY KEY, 
+            cust_id SERIAL NOT NULL PRIMARY KEY, 
             cust_name VARCHAR,
-            cust_card int
-            
+            cust_card VARCHAR
             );'''
 
     cursor.execute(sql)

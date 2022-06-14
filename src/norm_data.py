@@ -16,9 +16,9 @@ def store_table():
 
     df_store_column = df['store'].unique()
 
-    df_table = pd.DataFrame(df_store_column, columns=['Store name'])
-    df_table['Store code'] = [store_name[:3].upper()
-                              for store_name in df_table['Store name']]
+    df_table = pd.DataFrame(df_store_column, columns=['branch_name'])
+    df_table['branch_code'] = [store_name[:3].upper()
+                              for store_name in df_table['branch_name']]
 
     # print(df_store_column)
     return df_table
@@ -49,8 +49,8 @@ def items_table():
     # print(item_names[0])
     # print(prices)
     items_dict = {
-        'item_names': item_names,
-        'prices': prices1,
+        'item_name': item_names,
+        'item_price': prices1,
         'flavour': flav1,
     }
 
@@ -58,12 +58,12 @@ def items_table():
     # print(prices[0])
     # print(item_names)
     df_itemd = pd.DataFrame(items_dict, columns=[
-                            'item_names', 'prices', 'flavour'])
+                            'item_name', 'item_price', 'flavour'])
 
     # print(df_itemd)
 
-    uni_time = df_itemd['item_names'].unique()
-    uni_price = df_itemd['prices'].unique()
+    uni_time = df_itemd['item_name'].unique()
+    uni_price = df_itemd['item_price'].unique()
     uni_flav = df_itemd['flavour'].unique()
     # print(uni_time)
     # print(uni_price)
@@ -83,12 +83,12 @@ def items_table():
     df_itemd.drop_duplicates()
 
     df_dups_removed = df_itemd.drop_duplicates(
-        subset=['item_names', 'flavour'])
-    df_dups_removed.sort_values(by=['item_names'])
+        subset=['item_name', 'flavour'])
+    df_dups_removed.sort_values(by=['item_name'])
     # print(df_dups_removed)
 
     df_index = df_dups_removed.reset_index(drop=True)
-    df_index['item_id'] = df_index.index
+    # df_index['item_id'] = df_index.index
 
     return df_index
 
@@ -120,14 +120,14 @@ def customer_table():
     df_card_number_hash = df['card_number']
     # print(df)
 
-    dict_hash = {"customer_name_hash": df_customer_name_hash,
-                 "card_number_hash": df_card_number_hash,
+    dict_hash = {"cust_name": df_customer_name_hash,
+                 "cust_card": df_card_number_hash,
                  }
 
     df_customer = pd.DataFrame(dict_hash)
     # checking for duplicates
     df_cust_transformed = df_customer.drop_duplicates(
-        subset=['customer_name_hash', 'card_number_hash'], keep='first')
+        subset=['cust_name', 'cust_card'], keep='first')
 
     # print(df_customer)
     return df_cust_transformed
@@ -163,5 +163,48 @@ def trans_table():
     # print(df_transtable)
     return df_transtable_no_dups
 
+def trans_table():
+    df_trans_time = df['timestamp']
+    #df_trans_bcode = df['store']
+    df_trans_payment = df['cash_or_card']
+    #df_trans_cust = df_customer_name_hash
+    df_trans_tt = df['total_price']
 
-# Trans_table()
+    # print(df_trans_time)
+    dict_t = {"time_stamp": df_trans_time,
+              "payment_method": df_trans_payment,
+              "total_price": df_trans_tt
+              }
+
+    df_transtable = pd.DataFrame(dict_t)
+    # checking for duplicates
+    # df_transtable_no_dups = df_transtable.drop_duplicates(
+    #     subset=['Cust_name'])
+    # df_transtable['Time_stamp'] = df_trans_time
+
+    # df_transtable['Payment_type'] = df_trans_payment
+    # df_transtable['Cust'] = df_trans_cust
+    # df_transtable['Total_price'] = df_trans_tt
+
+    # print(df_transtable)
+    # return df_transtable_no_dups
+
+    return df_transtable
+
+
+# trans_table()
+
+
+def basket_table():
+    df_basket_tt = df['total_price']
+
+    dict_b = {"total_price": df_basket_tt}
+
+    df_bask_table = pd.DataFrame(dict_b)
+
+    # print(df_bask_table)
+
+    return df_bask_table
+
+
+# basket_table()

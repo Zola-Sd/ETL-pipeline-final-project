@@ -16,9 +16,9 @@ def alter_tran_table():
     sql = \
         '''
         ALTER TABLE transactions_table
-        ADD FOREIGN KEY (cust_id) REFERENCES transactions_table(trans_id),
-        ADD FOREIGN KEY (branch_id) REFERENCES transactions_table(trans_id),
-        ADD FOREIGN KEY (order_id) REFERENCES transactions_table(trans_id);
+        ADD FOREIGN KEY (cust_id) REFERENCES cust_table(cust_id),
+        ADD FOREIGN KEY (branch_id) REFERENCES store_table(branch_id),
+        ADD FOREIGN KEY (order_id) REFERENCES basket_table(order_id);
         '''
 
     cursor.execute(sql)
@@ -31,9 +31,8 @@ def alter_basket_table():
     sql = \
         '''
         ALTER TABLE basket_table
-        ADD FOREIGN KEY (cust_id) REFERENCES basket_table(order_id),
-        ADD FOREIGN KEY (item_id) REFERENCES basket_table(order_id);
-        
+        ADD FOREIGN KEY (cust_id) REFERENCES cust_table(cust_id),
+        ADD FOREIGN KEY (item_id) REFERENCES items_table(item_id);
         '''
 # Execut SQL Code
     cursor.execute(sql)
