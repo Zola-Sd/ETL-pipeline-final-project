@@ -5,26 +5,12 @@ Each function will return a dataframe
 to be loaded into the respective tables
 in the db.
 """
-#TODO: Create queries to check if there are duplicates in new dfs, relative to the tables in the db.
-#TODO: Handle PKs of new entries - ensure that new entries PK start at current max + 1
 import pandas as pd
 import hashlib
-import create_tables as ct
-from pathlib import Path
+import db_manager as dbm
+import boto3
 
-def fetch_filepath(filename):
-    return Path(__file__).parent/filename
-
-"""
-- Maybe define this in the load.py/app.py? Pass df (of raw data) as an argument to these functions??
-- Actual raw data from S3 has no field names, hard code these in (test.csv has field names)
-"""
-field_names = ['time_stamp', 'branch_name', 'cust_name', 'basket_items', 'total_price', 'payment_type', 'cust_card']
-df = pd.read_csv(fetch_filepath('uppingham_13-06-2022_09-00-00.csv'), names=field_names)
-
-print(df)
-
-def create_branches_df():
+def create_branches_df(df):
     """
     - Returns a df with the unique branch_names
     """
@@ -41,7 +27,7 @@ def hash_value(x):
     else:
         return x
 
-def create_customer_df():
+def create_customer_df(df):
     """
     - Returns a df with the unique customers
     - PII so values are hashed
@@ -62,7 +48,7 @@ def create_customer_df():
 
     return hashed_cust_df
 
-def fetch_products():
+def fetch_products(df):
     """
     - Returns a df with all products and details in the raw data
     - Must be transformed
@@ -73,16 +59,42 @@ def fetch_products():
     #Load this pd.Series object into a pd.DataFrame. Unwanted column - dropped after transformation
     products_df = pd.DataFrame(items_series, columns=['basket_items'])
 
+    #Query for max order_id to be the starting order_id of the new data getting loaded in
+    conn = dbm.fetch_conn()
+    cursor = conn.cursor()
+
+    sql = \
+        """
+        SELECT MAX(order_id) 
+        FROM orders;
+        """
+
+    cursor.execute(sql)
+    response = cursor.fetchone()
+    max_order_id = response[0]
+
+    if max_order_id != None:
+        starting_order_id = max_order_id + 1
+
+        order_ids = [order_id for order_id in range(starting_order_id, starting_order_id + len(products_df.index))]
+
+        products_df['order_id'] = order_ids
+    else:
+        products_df['order_id'] = products_df.index + 1
+
     #Explode contents of each order so that every item in an order is a separate row in the df
     products_df = products_df.explode('basket_items')
     
     return products_df
 
-def create_products_df():
+def create_products_df(df):
     """
     - Returns a df which transforms the unique products and details
     """
-    products_df = fetch_products()
+    products_df = fetch_products(df)
+
+    #Drop order_id column - not required for product table transformation
+    products_df = products_df.drop(columns=['order_id'])
 
     #Get unique products
     products_df = products_df.drop_duplicates(ignore_index=True)
@@ -114,11 +126,11 @@ def create_products_df():
     products_df['product_price'] = product_prices
 
     #Drop unwanted column
-    products_df = products_df.drop('basket_items', axis=1)
+    products_df = products_df.drop(columns=['basket_items'])
     
     return products_df
     
-def create_orders_df():
+def create_orders_df(df):
     """
     - Returns a df containing orders and the accompanying information
     - branch_id and cust_id columns rely on data which has to be loaded into 
@@ -130,7 +142,7 @@ def create_orders_df():
     orders_df_without_ids = orders_df_without_ids.drop_duplicates()
 
     #Fetch conn and cursor objects
-    conn = ct.fetch_conn()
+    conn = dbm.fetch_conn()
     cursor = conn.cursor()
 
     #Query branch_ids and cust_ids from their tables and populate into orders_df
@@ -172,15 +184,12 @@ def create_orders_df():
 
     return orders_df
 
-def create_basket_df():
+def create_basket_df(df):
     """
     - Returns a df containing individual products from each order
     - cols: order_id, product_id
     """
-    products_df = fetch_products()
-
-    #Create trans_id for every product in each order
-    products_df['order_id'] = products_df.index
+    products_df = fetch_products(df)
 
     #Names and flavours of all individual products from every order
     product_names = []
@@ -196,7 +205,7 @@ def create_basket_df():
             product_names.append(product_no_flavour)
 
     #Query products table to get all the product_names and product_ids
-    conn = ct.fetch_conn()
+    conn = dbm.fetch_conn()
     cursor = conn.cursor()
 
     sql = \
@@ -229,3 +238,64 @@ def create_basket_df():
     basket_df = pd.DataFrame(basket_dict)
 
     return basket_df
+
+def remove_duplicate_branches():
+    conn = dbm.fetch_conn()
+    cursor = conn.cursor()
+
+    sql = \
+        """
+        WITH CTE(branch_id, branch_name, duplicatecount)
+        AS (SELECT branch_id, branch_name, ROW_NUMBER() OVER(PARTITION BY branch_name ORDER BY branch_id) AS DuplicateCount
+            FROM branches)
+        DELETE FROM branches
+        USING CTE
+        WHERE branches.branch_id = CTE.branch_id
+        AND branches.branch_name = CTE.branch_name
+        AND duplicatecount > 1;
+        """
+    
+    cursor.execute(sql)
+    conn.commit()
+    conn.close()
+
+def remove_duplicate_products():
+    conn = dbm.fetch_conn()
+    cursor = conn.cursor()
+
+    sql = \
+        """
+        WITH CTE(product_id, product_name, product_flavour, product_price, duplicatecount)
+        AS (SELECT product_id, product_name, product_flavour, product_price, ROW_NUMBER() OVER(PARTITION BY product_name, product_flavour, product_price ORDER BY product_id)
+            FROM products)
+        DELETE FROM products
+        USING CTE
+        WHERE products.product_id = CTE.product_id
+        AND products.product_name = CTE.product_name
+        AND duplicatecount > 1;
+        """
+
+    cursor.execute(sql)
+    conn.commit()
+    conn.close()
+
+def remove_duplicate_customers():
+    conn = dbm.fetch_conn()
+    cursor = conn.cursor()
+
+    sql = \
+        """
+        WITH CTE(cust_id, cust_name, cust_card, duplicatecount)
+        AS (SELECT cust_id, cust_name, cust_card, ROW_NUMBER() OVER(PARTITION BY cust_name, cust_card ORDER BY cust_id)
+            FROM customers)
+        DELETE FROM customers
+        USING CTE
+        WHERE customers.cust_id = CTE.cust_id
+        AND customers.cust_name = CTE.cust_name
+        AND duplicatecount > 1;
+        """
+
+    cursor.execute(sql)
+    conn.commit()
+    conn.close()
+
