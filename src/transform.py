@@ -78,9 +78,7 @@ def fetch_order_ids(products_df):
 
     cursor.execute(sql)
     response = cursor.fetchone()
-    print(response)
     max_order_id = response[0]
-    print(max_order_id)
     
     #For the very first load (when db is empty), ensures order_id starts at 1
     if max_order_id == len(products_df.index) or max_order_id is None:
