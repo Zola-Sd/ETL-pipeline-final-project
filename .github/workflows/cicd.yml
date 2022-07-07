@@ -42,19 +42,12 @@ jobs:
         echo "Environment name: $ENVIRONMENT"
         echo "::set-output name=environment::$ENVIRONMENT"
 
-    - name: Deploy Amazon EKS Cluster
-      id: eks-cluster
+    - name: Deploy CloudFormation
       uses: aws-actions/aws-cloudformation-github-deploy@master
       with:
-        name: ${{ steps.env-name.outputs.environment }}-cluster
+        name: dev-deploy-team-3
         template: updated-cf-template.yml
         no-fail-on-empty-changeset: "1"
         parameter-overrides: >-
-          AvailabilityZones=${{ github.event.inputs.region }}a,
-          AvailabilityZones=${{ github.event.inputs.region }}c,
-          KeyPairName=${{ github.event.inputs.keypair }},
-          NumberOfAZs=2,
-          ProvisionBastionHost=Disabled,
-          EKSPublicAccessEndpoint=Enabled,
-          EKSPrivateAccessEndpoint=Enabled,
-          RemoteAccessCIDR=0.0.0.0/0
+          NotificationBucket=delon6-team3-raw-data, DeploymentBucket=cloudformation-ayub-test-bucket, DeploymentPackageKey=src.zip
+
