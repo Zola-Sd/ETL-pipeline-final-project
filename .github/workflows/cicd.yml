@@ -11,9 +11,9 @@ on:
         description: 'AWS Region'
         required: true
         default: 'eu-west-1'
-      keypair:
-          description: 'SSH Key Pair'   
-          required: true
+     # keypair:
+         # description: 'SSH Key Pair'   
+         # required: true
 
 jobs:
   cluster:
