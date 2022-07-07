@@ -28,7 +28,7 @@ Resources:
             - sts:AssumeRole
       Path: "/"
       Policies:
-      - PolicyName: LambdaLogsPolicy
+      - PolicyName: CloudFormationRole
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
