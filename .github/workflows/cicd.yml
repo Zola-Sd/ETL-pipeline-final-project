@@ -36,7 +36,7 @@ jobs:
     - name: Configure environment name
       id: env-name
       env:
-        REPO: ${{ github.repository }}
+        REPO: ${{ github.team-3-project }}
       run: |
         ENVIRONMENT=`echo $REPO | tr "/" "-"`
         echo "Environment name: $ENVIRONMENT"
