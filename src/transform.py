@@ -71,8 +71,10 @@ def fetch_products(df):
 
     cursor.execute(sql)
     response = cursor.fetchone()
+    print(response)
     max_order_id = response[0]
-
+    print(max_order_id)
+    
     if max_order_id != None:
         starting_order_id = max_order_id + 1
 
@@ -266,7 +268,7 @@ def remove_duplicate_products():
     sql = \
         """
         WITH CTE(product_id, product_name, product_flavour, product_price, duplicatecount)
-        AS (SELECT product_id, product_name, product_flavour, product_price, ROW_NUMBER() OVER(PARTITION BY product_name, product_flavour, product_price ORDER BY product_id)
+        AS (SELECT product_id, product_name, product_flavour, product_price, ROW_NUMBER() OVER(PARTITION BY product_name, product_flavour, product_price ORDER BY product_id) AS DuplicateCount
             FROM products)
         DELETE FROM products
         USING CTE
@@ -286,7 +288,7 @@ def remove_duplicate_customers():
     sql = \
         """
         WITH CTE(cust_id, cust_name, cust_card, duplicatecount)
-        AS (SELECT cust_id, cust_name, cust_card, ROW_NUMBER() OVER(PARTITION BY cust_name, cust_card ORDER BY cust_id)
+        AS (SELECT cust_id, cust_name, cust_card, ROW_NUMBER() OVER(PARTITION BY cust_name, cust_card ORDER BY cust_id) AS DuplicateCount
             FROM customers)
         DELETE FROM customers
         USING CTE
