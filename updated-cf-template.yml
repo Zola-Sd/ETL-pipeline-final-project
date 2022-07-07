@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >
+  Template to deploy a lambda which is triggered by an S3 event.
+Parameters:
+  DeploymentBucket:
+    Type: String
+    Description: This is the place where the zip and templates are stored
+  DeploymentPackageKey:
+    Type: String
+    Description: Name of the zip file
+  NotificationBucket:
+    Type: String
+    Description: S3 bucket that's used for the Lambda event notification
+
+Resources:
+  LambdaFunctionRole:
+    Type: AWS::IAM::Role
+    DeletionPolicy : Retain
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+              - lambda.amazonaws.com
+          Action:
+            - sts:AssumeRole
+      Path: "/"
+      Policies:
+      - PolicyName: LambdaLogsPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: "*"
+
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    DeletionPolicy : Retain
+    Properties:
+      Runtime: python3.8
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt LambdaFunctionRole.Arn
+      Code:
+        S3Bucket: !Ref DeploymentBucket
+        S3Key: !Ref DeploymentPackageKey
+
+  S3Bucket:
+    Type: 'AWS::S3::Bucket'
+    DeletionPolicy : Retain
+    Properties:
+      BucketName: delon6-team3-raw-data
+      NotificationConfiguration:
+        LambdaConfigurations:
+              - Event: s3:ObjectCreated:*
+                Function: !GetAtt LambdaFunction.Arn
+
+  S3BucketPermission:
+    Type: AWS::Lambda::Permission
+    Properties: 
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref LambdaFunction
+      Principal: s3.amazonaws.com
+      SourceArn: !GetAtt S3Bucket.Arn
