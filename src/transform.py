@@ -59,7 +59,14 @@ def fetch_products(df):
     #Load this pd.Series object into a pd.DataFrame. Unwanted column - dropped after transformation
     products_df = pd.DataFrame(items_series, columns=['basket_items'])
 
-    #Query for max order_id to be the starting order_id of the new data getting loaded in
+    return products_df
+
+def fetch_order_ids(products_df):
+    """
+    Fetches the correct order_ids from the orders table
+    and assigns them to the correct products required
+    for the basket transformation/load.
+    """
     conn = dbm.fetch_conn()
     cursor = conn.cursor()
 
@@ -72,19 +79,22 @@ def fetch_products(df):
     cursor.execute(sql)
     response = cursor.fetchone()
     max_order_id = response[0]
-
-    if max_order_id != None:
-        starting_order_id = max_order_id + 1
+    
+    #For the very first load (when db is empty), ensures order_id starts at 1
+    if max_order_id == len(products_df.index) or max_order_id is None:
+        products_df['order_id'] = products_df.index + 1
+    #Any subsequent load when orders_table is populated in db, ensures order_id starts
+    #at the (max order_id + 1) of the orders in orders_table.
+    else:
+        starting_order_id = max_order_id - len(products_df.index) + 1
 
         order_ids = [order_id for order_id in range(starting_order_id, starting_order_id + len(products_df.index))]
 
         products_df['order_id'] = order_ids
-    else:
-        products_df['order_id'] = products_df.index + 1
-
-    #Explode contents of each order so that every item in an order is a separate row in the df
-    products_df = products_df.explode('basket_items')
     
+    #Explode contents of each order so that every item in an order is a separate row in the df, with order_ids
+    products_df = products_df.explode('basket_items')
+
     return products_df
 
 def create_products_df(df):
@@ -93,9 +103,9 @@ def create_products_df(df):
     """
     products_df = fetch_products(df)
 
-    #Drop order_id column - not required for product table transformation
-    products_df = products_df.drop(columns=['order_id'])
-
+    #Explode contents of each order so that every item in an order is a separate row in the df
+    products_df = products_df.explode('basket_items')
+    
     #Get unique products
     products_df = products_df.drop_duplicates(ignore_index=True)
     
@@ -190,7 +200,7 @@ def create_basket_df(df):
     - cols: order_id, product_id
     """
     products_df = fetch_products(df)
-
+    products_df = fetch_order_ids(products_df)
     #Names and flavours of all individual products from every order
     product_names = []
 
@@ -266,7 +276,7 @@ def remove_duplicate_products():
     sql = \
         """
         WITH CTE(product_id, product_name, product_flavour, product_price, duplicatecount)
-        AS (SELECT product_id, product_name, product_flavour, product_price, ROW_NUMBER() OVER(PARTITION BY product_name, product_flavour, product_price ORDER BY product_id)
+        AS (SELECT product_id, product_name, product_flavour, product_price, ROW_NUMBER() OVER(PARTITION BY product_name, product_flavour, product_price ORDER BY product_id) AS DuplicateCount
             FROM products)
         DELETE FROM products
         USING CTE
@@ -286,7 +296,7 @@ def remove_duplicate_customers():
     sql = \
         """
         WITH CTE(cust_id, cust_name, cust_card, duplicatecount)
-        AS (SELECT cust_id, cust_name, cust_card, ROW_NUMBER() OVER(PARTITION BY cust_name, cust_card ORDER BY cust_id)
+        AS (SELECT cust_id, cust_name, cust_card, ROW_NUMBER() OVER(PARTITION BY cust_name, cust_card ORDER BY cust_id) AS DuplicateCount
             FROM customers)
         DELETE FROM customers
         USING CTE
@@ -298,4 +308,3 @@ def remove_duplicate_customers():
     cursor.execute(sql)
     conn.commit()
     conn.close()
-

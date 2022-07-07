@@ -28,12 +28,13 @@ def run_app(df):
     tr.remove_duplicate_products()
     tr.remove_duplicate_customers()
 
-    #More transformations...
+    #Orders transformation
     orders_df = tr.create_orders_df(df)
-    basket_df = tr.create_basket_df(df)
-    
-    #Second load
+    #Load orders before basket as the basket needs the correct order_id
     ld.load_orders(orders_df)
+    
+    #Basket transformation + load
+    basket_df = tr.create_basket_df(df)
     ld.load_basket(basket_df)
     
     print("Did it work?")
