@@ -48,6 +48,5 @@ jobs:
         name: dev-deploy-team-3
         template: updated-cf-template.yml
         no-fail-on-empty-changeset: "1"
-        parameter-overrides: >-
-          NotificationBucket=delon6-team3-raw-data, DeploymentBucket=cloudformation-ayub-test-bucket, DeploymentPackageKey=src.zip
+        parameter-overrides: "NotificationBucket=delon6-team3-raw-data, DeploymentBucket=cloudformation-ayub-test-bucket, DeploymentPackageKey=src.zip"
 
