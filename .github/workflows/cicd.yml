@@ -6,55 +6,46 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      region:
-        description: 'AWS Region'
-        required: true
-        default: 'eu-west-1'
-      keypair:
-          description: 'SSH Key Pair'   
-          required: true
+   
 
 jobs:
-  cluster:
+  build:
+    name: Build stack resources
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+      
+    - name: zip github repository
+      run: zip -r -j src.zip src/*
+      
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.TEAM3_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.TEAM3_SECRET_ACCESS_KEY }}
+        aws-region: eu-west-1
+        
+    - name: Deploy stack to AWS
+      run: aws s3 cp ./src.zip s3://cloudformation-ayub-test-bucket/src.zip
+
+    
+  deploy:
     name: Deploy stack to AWS
     runs-on: ubuntu-latest
-    outputs:
-      env-name: ${{ steps.env-name.outputs.environment }}
+    needs: build
     steps:
     - name: Checkout
       uses: actions/checkout@v2
 
     - name: Configure AWS credentials
-      id: creds
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.TEAM3_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.TEAM3_SECRET_ACCESS_KEY }}
         aws-region: eu-west-1
 
-    - name: Configure environment name
-      id: env-name
-      env:
-        REPO: ${{ github.team-3-project }}
-      run: |
-        ENVIRONMENT=`echo $REPO | tr "/" "-"`
-        echo "Environment name: $ENVIRONMENT"
-        echo "::set-output name=environment::$ENVIRONMENT"
+    - name: executes cloudformation deploy command
+      run: aws cloudformation deploy --template-file updated-cf-template.yml --stack-name dev-deploy-team-3 --s3-bucket cloudformation-ayub-test-bucket --region eu-west-1 --parameter-overrides NotificationBucket=delon6-team3-raw-data DeploymentBucket=cloudformation-ayub-test-bucket DeploymentPackageKey=src.zip --capabilities CAPABILITY_IAM
 
-    - name: Deploy Amazon EKS Cluster
-      id: eks-cluster
-      uses: aws-actions/aws-cloudformation-github-deploy@master
-      with:
-        name: ${{ steps.env-name.outputs.environment }}-cluster
-        template: updated-cf-template.yml
-        no-fail-on-empty-changeset: "1"
-        parameter-overrides: >-
-          AvailabilityZones=${{ github.event.inputs.region }}a,
-          AvailabilityZones=${{ github.event.inputs.region }}c,
-          KeyPairName=${{ github.event.inputs.keypair }},
-          NumberOfAZs=2,
-          ProvisionBastionHost=Disabled,
-          EKSPublicAccessEndpoint=Enabled,
-          EKSPrivateAccessEndpoint=Enabled,
-          RemoteAccessCIDR=0.0.0.0/0
+
