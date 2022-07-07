@@ -55,7 +55,7 @@ def create_branch_table():
         CREATE TABLE IF NOT EXISTS branches(
             branch_id int IDENTITY NOT NULL,
             branch_name VARCHAR(100) NOT NULL,
-            PRIMARY KEY(branch_id));
+            PRIMARY KEY(branch_id)
         );
         """
 
