@@ -10,7 +10,7 @@ Parameters:
     Description: Name of the zip file
   NotificationBucket:
     Type: String
-    Description: S3 bucket that's used for the Lambda event notification
+    Description: S3 bucket that's used for the Lambda event notification + test
 
 Resources:
   LambdaFunctionRole:
