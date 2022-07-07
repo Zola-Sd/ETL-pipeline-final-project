@@ -23,11 +23,7 @@ jobs:
         aws-secret-access-key: ${{ secrets.TEAM3_SECRET_ACCESS_KEY }}
         aws-region: eu-west-1
 
-    - name: Deploy CloudFormation
-      uses: aws-actions/aws-cloudformation-github-deploy@master
-      with:
-        name: dev-deploy-team-3
-        template: updated-cf-template.yml
-        no-fail-on-empty-changeset: "1"
-        parameter-overrides: "NotificationBucket=delon6-team3-raw-data, DeploymentBucket=cloudformation-ayub-test-bucket, DeploymentPackageKey=src.zip"
+    - name: deploy lambda
+      run: aws cloudformation deploy --template-file deployment.yaml --stack-name team4-cf-lambda --s3-bucket team-4-zip-temp-bucket --region eu-west-1 --parameter-overrides S3CSVBucketName=awaynetesttrigger DeploymentBucket=team-4-zip-temp-bucket DeploymentPackageKey=lambda.zip --capabilities CAPABILITY_IAM
+
 
