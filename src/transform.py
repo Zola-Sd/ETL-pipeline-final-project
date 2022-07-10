@@ -79,7 +79,7 @@ def fetch_order_ids(products_df):
     cursor.execute(sql)
     response = cursor.fetchone()
     max_order_id = response[0]
-    
+
     #For the very first load (when db is empty), ensures order_id starts at 1
     if max_order_id == len(products_df.index) or max_order_id is None:
         products_df['order_id'] = products_df.index + 1
@@ -121,7 +121,7 @@ def create_products_df(df):
         product_prices.append(product_price)
 
         #Handle flavours
-        if 'Flavoured' in product:
+        if 'Flavoured' in product or len(details) == 3:
             #Append flavour
             product_flavour = f'{details[1]}'
             product_flavours.append(product_flavour)
@@ -207,7 +207,7 @@ def create_basket_df(df):
     #TODO: refactor this? Repeating code from create_products_df()
     for product in products_df['basket_items']:
         details = product.split(' - ')
-        if 'Flavoured' in product:
+        if 'Flavoured' in product or len(details) == 3:
             product_and_flavour = f'{details[0]} {details[1]}'
             product_names.append(product_and_flavour)
         else:
