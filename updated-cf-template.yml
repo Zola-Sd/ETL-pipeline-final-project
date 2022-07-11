@@ -27,6 +27,7 @@ Resources:
           Action:
             - sts:AssumeRole
       Path: "/"
+      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/ScopePermissions
       Policies:
       - PolicyName: CloudFormationRole
         PolicyDocument:
