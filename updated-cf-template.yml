@@ -10,7 +10,7 @@ Parameters:
     Description: Name of the zip file
   NotificationBucket:
     Type: String
-    Description: S3 bucket that's used for the Lambda event notification + test
+    Description: S3 bucket that's used for the Lambda event notification
 
 Resources:
   LambdaFunctionRole:
@@ -27,9 +27,8 @@ Resources:
           Action:
             - sts:AssumeRole
       Path: "/"
-      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/ScopePermissions
       Policies:
-      - PolicyName: CloudFormationRole
+      - PolicyName: LambdaLogsPolicy
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
@@ -39,7 +38,6 @@ Resources:
               - logs:CreateLogStream
               - logs:PutLogEvents
             Resource: "*"
-
   LambdaFunction:
     Type: AWS::Lambda::Function
     DeletionPolicy : Retain
@@ -50,17 +48,23 @@ Resources:
       Code:
         S3Bucket: !Ref DeploymentBucket
         S3Key: !Ref DeploymentPackageKey
-
+  LambdaInvokePermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      FunctionName: !GetAtt LambdaFunction.Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref 'AWS::AccountId'
+      SourceArn: !Sub 'arn:aws:s3:::${NotificationBucket}'    
   S3Bucket:
     Type: 'AWS::S3::Bucket'
     DeletionPolicy : Retain
     Properties:
-      BucketName: d6t3-S3
-#       NotificationConfiguration:
-#         LambdaConfigurations:
-#               - Event: s3:ObjectCreated:*
-#                 Function: !GetAtt LambdaFunction.Arn
-
+      BucketName: delon6-team3-raw-data
+      NotificationConfiguration:
+        LambdaConfigurations:
+              - Event: s3:ObjectCreated:*
+                Function: !GetAtt LambdaFunction.Arn
   S3BucketPermission:
     Type: AWS::Lambda::Permission
     Properties: 
@@ -68,3 +72,5 @@ Resources:
       FunctionName: !Ref LambdaFunction
       Principal: s3.amazonaws.com
       SourceArn: !GetAtt S3Bucket.Arn
+
+  
