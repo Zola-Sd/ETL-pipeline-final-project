@@ -51,20 +51,20 @@ Resources:
         S3Bucket: !Ref DeploymentBucket
         S3Key: !Ref DeploymentPackageKey
 
-  S3Bucket:
-    Type: 'AWS::S3::Bucket'
-    DeletionPolicy : Retain
-    Properties:
-      BucketName: delon6-team3-raw-data
-      NotificationConfiguration:
-        LambdaConfigurations:
-              - Event: s3:ObjectCreated:*
-                Function: !GetAtt LambdaFunction.Arn
+#   S3Bucket:
+#     Type: 'AWS::S3::Bucket'
+#     DeletionPolicy : Retain
+#     Properties:
+#       BucketName: delon6-team3-raw-data
+#       NotificationConfiguration:
+#         LambdaConfigurations:
+#               - Event: s3:ObjectCreated:*
+#                 Function: !GetAtt LambdaFunction.Arn
 
-  S3BucketPermission:
-    Type: AWS::Lambda::Permission
-    Properties: 
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref LambdaFunction
-      Principal: s3.amazonaws.com
-      SourceArn: !GetAtt S3Bucket.Arn
+#   S3BucketPermission:
+#     Type: AWS::Lambda::Permission
+#     Properties: 
+#       Action: lambda:InvokeFunction
+#       FunctionName: !Ref LambdaFunction
+#       Principal: s3.amazonaws.com
+#       SourceArn: !GetAtt S3Bucket.Arn
