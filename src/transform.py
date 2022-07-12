@@ -8,7 +8,6 @@ in the db.
 import pandas as pd
 import hashlib
 import db_manager as dbm
-import boto3
 
 def create_branches_df(df):
     """
